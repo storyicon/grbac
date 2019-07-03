@@ -4,7 +4,7 @@
 
 [中文文档](https://github.com/storyicon/grbac/blob/master/docs/README-chinese.md)
 
-Grbac is a fast, elegant and concise `RBAC` framework. It supports [enhanced wildcards](#5-benchmark) and matches HTTP requests using [Radix](https://en.wikipedia.org/wiki/Radix) trees. Even more amazing is that you can easily use it in any existing database and data structure.        
+Grbac is a fast, elegant and concise [RBAC](https://en.wikipedia.org/wiki/Role-based_access_control) framework. It supports [enhanced wildcards](#5-benchmark) and matches HTTP requests using [Radix](https://en.wikipedia.org/wiki/Radix) trees. Even more amazing is that you can easily use it in any existing database and data structure.        
 
 What grbac does is ensure that the specified resource can only be accessed by the specified role. Please note that grbac is not responsible for the storage of rule configurations and "what roles the current request initiator has". It means you should configure the rule information first and provide the roles that the initiator of each request has.        
 
