@@ -28,8 +28,8 @@ type Permission struct {
 	//      *: means any role, but visitors should have at least one role,
 	//      non-empty string: specified role
 	AuthorizedRoles []string `json:"authorized_roles"`
-	// AuthorizedRoles defines roles that not allow access to specified resource
-	// AuthorizedRoles has a higher priority than AuthorizedRoles
+	// ForbiddenRoles defines roles that not allow access to specified resource
+	// ForbiddenRoles has a higher priority than AuthorizedRoles
 	// Accepted type: non-empty string, *
 	//      *: means any role, but visitors should have at least one role,
 	//      non-empty string: specified role

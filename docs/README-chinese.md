@@ -2,34 +2,32 @@
 
 ![grbac](https://raw.githubusercontent.com/storyicon/grbac/master/docs/screenshot/grbac.png)
 
-[????](https://github.com/storyicon/grbac/blob/master/docs/README-Chinese.md)
+Grbac是一个快速，优雅和简洁的RBAC框架。它支持[增强的通配符](#5-benchmark)并使用[Radix](https://en.wikipedia.org/wiki/Radix)树匹配HTTP请求。令人惊奇的是，您可以在任何现有的数据库和数据结构中轻松使用它。
 
-Grbac is a fast, elegant and concise `RBAC` framework. It supports [enhanced wildcards](#5-benchmark) and matches HTTP requests using [Radix](https://en.wikipedia.org/wiki/Radix) trees. Even more amazing is that you can easily use it in any existing database and data structure.        
+grbac的作用是确保指定的资源只能由指定的角色访问。请注意，grbac不负责存储鉴权规则和分辨“当前请求发起者具有哪些角色”，更不负责角色的创建、分配等。这意味着您应该首先配置规则信息，并提供每个请求的发起者具有的角色。
 
-What grbac does is ensure that the specified resource can only be accessed by the specified role. Please note that grbac is not responsible for the storage of rule configurations and "what roles the current request initiator has". It means you should configure the rule information first and provide the roles that the initiator of each request has.        
+grbac将`Host`、`Path`和`Method`的组合视为`Resource`，并将`Resource`绑定到一组角色规则（称为`Permission`）。只有符合这些规则的用户才能访问相应的`Resource`。
 
-grbac treats the combination of `Host`, `Path`, and `Method` as a `Resource`, and binds the `Resource` to a set of role rules (called `Permission`). Only users who meet these rules can access the corresponding `Resource`.        
+读取鉴权规则的组件称为`Loader`。grbac预置了一些`Loader`，你也可以通过实现`func()(grbac.Rules，error)`来根据你的设计来自定义`Loader`，并通过`grbac.WithLoader`加载它。
 
-The component that reads the rule information is called `Loader`. grbac presets some loaders, you can also customize a loader by implementing `func()(grbac.Rules, error)` and load it via `grbac.WithLoader`.        
+- [1. 最常见的用例](#1-最常见的用例)
+- [2. 概念](#2-概念)
+    - [2.1. Rule](#21-rule)
+    - [2.2. Resource](#22-resource)
+    - [2.3. Permission](#23-permission)
+    - [2.4. Loader](#24-loader)
+- [3. 其他例子](#3-其他例子)
+    - [3.1. gin && grbac.WithJSON](#31-gin--grbacwithjson)
+    - [3.2. echo && grbac.WithYaml](#32-echo--grbacwithyaml)
+    - [3.3. iris && grbac.WithRules](#33-iris--grbacwithrules)
+    - [3.4. ace && grbac.WithAdvancedRules](#34-ace--grbacwithadvancedrules)
+    - [3.5. gin && grbac.WithLoader](#35-gin--grbacwithloader)
+- [4. 增强的通配符](#4-增强的通配符)
+- [5. 运行效率](#5-运行效率)
 
-- [1. Most Common Use Case](#1-most-common-use-case)
-- [2. Concept](#2-concept)
-	- [2.1. Rule](#21-rule)
-	- [2.2. Resource](#22-resource)
-	- [2.3. Permission](#23-permission)
-	- [2.4. Loader](#24-loader)
-- [3. Other Examples](#3-other-examples)
-	- [3.1. gin && grbac.WithJSON](#31-gin--grbacwithjson)
-	- [3.2. echo && grbac.WithYaml](#32-echo--grbacwithyaml)
-	- [3.3. iris && grbac.WithRules](#33-iris--grbacwithrules)
-	- [3.4. ace && grbac.WithAdvancedRules](#34-ace--grbacwithadvancedrules)
-	- [3.5. gin && grbac.WithLoader](#35-gin--grbacwithloader)
-- [4. Enhanced wildcards](#4-enhanced-wildcards)
-- [5. BenchMark](#5-benchmark)
+## 1. 最常见的用例
 
-## 1. Most Common Use Case
-
-Below is the most common use case, which uses `gin` and wraps `grbac` as a middleware. With this example, you can easily know how to use `grbac` in other http frameworks(like `echo`, `iris`, `ace`, etc):
+下面是最常见的用例，它使用`gin`，并将`grbac`包装成了一个中间件。通过这个例子，你可以很容易地知道如何在其他http框架中使用`grbac`（比如`echo`，`iris`，`ace`等）：
 
 ```go
 package main
@@ -42,26 +40,25 @@ import (
 )
 
 func LoadAuthorizationRules() (rules grbac.Rules, err error) {
-    // Implement your logic here
+    // 在这里实现你的逻辑
     // ...
-    // You can load authorization rules from database or file
-    // But you need to return your authentication rules in the form of grbac.Rules
-    // tips: You can also bind this function to a golang struct
+    // 你可以从数据库或文件加载授权规则
+    // 但是你需要以 grbac.Rules 的格式返回你的身份验证规则
+    // 提示：你还可以将此函数绑定到golang结构体
     return
 }
 
 func QueryRolesByHeaders(header http.Header) (roles []string,err error){
-    // Implement your logic here
+    // 在这里实现你的逻辑
     // ...
-    // This logic maybe take a token from the headers and
-    // query the user's corresponding roles from the database based on the token.
+    // 这个逻辑可能是从请求的Headers中获取token，并且根据token从数据库中查询用户的相应角色。
     return roles, err
 }
 
 func Authorization() gin.HandlerFunc {
-    // Here, we use a custom Loader function via "grbac.WithLoader"
-    // and specify that this function should be called every minute to update the authentication rules.
-    // Grbac also offers some ready-made Loaders:
+    // 在这里，我们通过“grbac.WithLoader”接口使用自定义Loader功能
+    // 并指定应每分钟调用一次LoadAuthorizationRules函数以获取最新的身份验证规则。
+    // Grbac还提供一些现成的Loader：
     // grbac.WithYAML
     // grbac.WithRules
     // grbac.WithJSON
@@ -88,39 +85,38 @@ func main(){
     c := gin.New()
     c.Use(Authorization())
 
-    // Bind your API here
+    // 在这里通过c.Get、c.Post等函数绑定你的API
     // ...
 
     c.Run(":8080")
 }
 ```
-## 2. Concept
+## 2. 概念
 
-Here are some concepts about `grbac`. It's very simple, you may only need three minutes to understand.
+这里有一些关于`grbac`的概念。这很简单，你可能只需要三分钟就能理解。
 
 ### 2.1. Rule
 
 ```go
-// Rule is used to define the relationship between "resource" and "permission"
+// Rule即规则，用于定义Resource和Permission之间的关系
 type Rule struct {
-    // The ID controls the priority of the rule.
-    // The higher the ID means the higher the priority of the rule.
-    // When a request is matched to more than one rule,
-    // then authentication will only use the permission configuration for the rule with the highest ID value.
-    // If there are multiple rules that are the largest ID, then one of them will be used randomly.
+    // ID决定了Rule的优先级。
+    // ID值越大意味着Rule的优先级越高。
+    // 当请求被多个规则同时匹配时，grbac将仅使用具有最高ID值的规则。
+    // 如果有多个规则同时具有最大的ID，则将随机使用其中一个规则。
     ID int `json:"id"`
     *Resource
     *Permission
 }
 ```
 
-As you can see, the `Rule` consists of three parts: `ID`, `Resource`, and `Permission`.      
-The `ID` determines the priority of the Rule.      
-When a request meets multiple rules at the same time (such as in a wildcard), 
-`grbac` will select the one with the highest ID, then authenticate with its Permission definition.       
-If multiple rules of the same ID are matched at the same time, grbac will randomly select one from them.      
+如你所见，`Rule`由三部分组成：`ID`，`Resource`和`Permission`。
+“ID”确定规则的优先级。
+当请求同时满足多个规则时（例如在通配符中），
+`grbac`将选择具有最高ID的那个，然后使用其权限定义进行身份验证。
+如果有多个规则同时具有最大的ID，则将随机使用其中一个规则（所以请避免这种情况）。
 
-Here is a very simple example:
+下面有一个非常简单的例子：
 
 ```yaml
 #Rule
@@ -148,82 +144,82 @@ Here is a very simple example:
   allow_anyone: false
 ```
 
-In this configuration file written in yaml format, the rule with `ID=0` states that all resources can be accessed by anyone with any role.
-But the rule with `ID=1` states that only the `editor` can operate on the article.          
-Then, except that the operation of the article can only be accessed by the `editor`, all other resources can be accessed by anyone with any role.         
+在以yaml格式编写的此配置文件中，ID=0 的规则表明任何具有任何角色的人都可以访问所有资源。
+但是ID=1的规则表明只有`editor`可以对文章进行增删改操作。
+这样，除了文章的操作只能由`editor`访问之外，任何具有任何角色的人都可以访问所有其他资源。
 
 ### 2.2. Resource
 
 ```go
-// Resource defines resources
 type Resource struct {
-    // Host defines the host of the resource, allowing wildcards to be used.
+    // Host 定义资源的Host，允许使用增强的通配符。
     Host string `json:"host"`
-    // Path defines the path of the resource, allowing wildcards to be used.
+    // Path 定义资源的Path，允许使用增强的通配符。
     Path string `json:"path"`
-    // Method defines the method of the resource, allowing wildcards to be used.
+    // Method 定义资源的Method，允许使用增强的通配符。
     Method string `json:"method"`
 }
 ```
 
-Resource is used to describe which resources a rule applies to. 
-When `IsRequestGranted(c.Request, roles)` is executed, grbac first matches the current `Request` with the `Resources` in all `Rule`s.
+Resource用于描述Rule适用的资源。
+当执行`IsRequestGranted(c.Request，roles)`时，grbac首先将当前的`Request`与所有`Rule`中的`Resources`匹配。
 
-Each field of Resource supports [enhanced wildcards](#5-benchmark)
+Resource的每个字段都支持[增强的通配符](#5-benchmark)
 
 ### 2.3. Permission
 
 ```go
-// Permission is used to define permission control information
+// Permission用于定义权限控制信息
 type Permission struct {
-    // AuthorizedRoles defines roles that allow access to specified resource
-    // Accepted type: non-empty string, *
-    //      *: means any role, but visitors should have at least one role,
-    //      non-empty string: specified role
+    // AuthorizedRoles定义允许访问资源的角色
+    // 支持的类型: 非空字符串，*
+    //      *: 意味着任何角色，但访问者应该至少有一个角色，
+    //      非空字符串：指定的角色
     AuthorizedRoles []string `json:"authorized_roles"`
-    // ForbiddenRoles defines roles that not allow access to specified resource
-    // ForbiddenRoles has a higher priority than AuthorizedRoles
-    // Accepted type: non-empty string, *
-    //      *: means any role, but visitors should have at least one role,
-    //      non-empty string: specified role
+    // ForbiddenRoles 定义不允许访问指定资源的角色
+    // ForbiddenRoles 优先级高于AuthorizedRoles
+    // 支持的类型：非空字符串，*
+    //      *: 意味着任何角色，但访问者应该至少有一个角色，
+    //      非空字符串：指定的角色
     //
     ForbiddenRoles []string `json:"forbidden_roles"`
-    // AllowAnyone has a higher priority than ForbiddenRoles/AuthorizedRoles
-    // If set to true, anyone will be able to pass authentication.
-    // Note that this will include people without any role.
+    // AllowAnyone的优先级高于 ForbiddenRoles、AuthorizedRoles
+    // 如果设置为true，任何人都可以通过验证。
+    // 请注意，这将包括“没有角色的人”。
     AllowAnyone bool `json:"allow_anyone"`
 }
 ```
 
-`Permission` is used to define the authorization rules of the `Resource` to which it is bound.
-That's understandable. When the roles of the requester meets the definition of `Permission`, he will be allowed access, otherwise he will be denied access.
+“Permission”用于定义绑定到的“Resource”的授权规则。
+这是易于理解的，当请求者的角色符合“Permission”的定义时，他将被允许访问Resource，否则他将被拒绝访问。
 
-For faster speeds, fields in `Permission` do not support `enhanced wildcards`.
-Only `*` is allowed in `AuthorizedRoles` and `ForbiddenRoles` to indicate `all`.
+为了加快验证的速度，`Permission`中的字段不支持“增强的通配符”。
+在`AuthorizedRoles`和`ForbiddenRoles`中只允许`*`表示所有。
 
 ### 2.4. Loader
 
-Loader is used to load authorization rules. grbac presets some loaders, you can also customize a loader by implementing `func()(grbac.Rules, error)` and load it via `grbac.WithLoader`.        
+Loader用于加载Rule。 grbac预置了一些加载器，你也可以通过实现`func()(grbac.Rules, error)` 来自定义加载器并通过 `grbac.WithLoader` 加载它。
 
 | method | description |
 | --- | --- |
-| WithJSON(path, interval)  | periodically load rules configuration from `json` file  |
-| WithYaml(path, interval) | periodically load rules configuration from `yaml` file |
-| WithRules(Rules) | load rules configuration from `grbac.Rules` |
-| WithAdvancedRules(loader.AdvancedRules) | load advanced rules from `loader.AdvancedRules`| 
-| WithLoader(loader func()(Rules, error), interval) | periodically load rules with custom functions |
+| WithJSON(path, interval)  | 定期从`json`文件加载规则配置  |
+| WithYaml(path, interval) | 定期从`yaml`文件加载规则配置 |
+| WithRules(Rules) | 从`grbac.Rules`加载规则配置 |
+| WithAdvancedRules(loader.AdvancedRules) | 以一种更紧凑的方式定义Rule，并使用`loader.AdvancedRules`加载 | 
+| WithLoader(loader func()(Rules, error), interval) | 使用自定义函数定期加载规则 |
      
-`interval` defines the reload period of the authentication rule.     
-When `interval < 0`, `grbac` will abandon periodically loading the configuration file;     
-When `interval∈[0,1s)`, `grbac` will automatically set the `interval` to `5s`;     
+`interval`定义了Rules的重载周期。
+当`interval <0`时，`grbac`会放弃周期加载Rules配置;
+当`interval∈[0,1s）`时，`grbac`会自动将`interval`设置为`5s`;
 
-## 3. Other Examples
+## 3. 其他例子
 
-Here are some simple examples to make it easier to understand how `grbac` works.     
-Although `grbac` works well in most http frameworks, I am sorry that I only use gin now, so if there are some flaws in the example below, please let me know.     
+这里有一些简单的例子，可以让你更容易理解`grbac`的工作原理。
+虽然`grbac`在大多数http框架中运行良好，但很抱歉我现在只使用gin，所以如果下面的例子中有一些缺陷，请告诉我。
+
 ### 3.1. gin && grbac.WithJSON
 
-If you want to write the configuration file in a `JSON` file, you can load it via `grbac.WithJSON(file, interval)`, `file` is your json file path, and grbac will reload the file every `interval`.     
+如果你想在`JSON`文件中编写配置文件，你可以通过`grbac.WithJSON(filepath，interval)`加载它，`filepath`是你的json文件路径，并且grbac将每隔interval重新加载一次文件。 。
 
 ```json
 [
@@ -251,15 +247,15 @@ If you want to write the configuration file in a `JSON` file, you can load it vi
     }
 ]
 ```
-The above is an example of authentication rule in `JSON` format. It's structure is based on [grbac.Rules](#21-rule).
+
+以上是“JSON”格式的身份验证规则示例。它的结构基于[grbac.Rules](#21-rule)。
 
 ```go
 
 func QueryRolesByHeaders(header http.Header) (roles []string,err error){
-    // Implement your logic here
+    // 在这里实现你的逻辑
     // ...
-    // This logic maybe take a token from the headers and
-    // query the user's corresponding roles from the database based on the token.
+    // 这个逻辑可能是从请求的Headers中获取token，并且根据token从数据库中查询用户的相应角色。
     return roles, err
 }
 
@@ -292,7 +288,7 @@ func main(){
     c := gin.New()
     c.Use(Authentication())
 
-    // Bind your API here
+    // 在这里通过c.Get、c.Post等函数绑定你的API
     // ...
     
     c.Run(":8080")
@@ -302,7 +298,7 @@ func main(){
 
 ### 3.2. echo && grbac.WithYaml
 
-If you want to write the configuration file in a `YAML` file, you can load it via `grbac.WithYAML(file, interval)`, `file` is your yaml file path, and grbac will reload the file every `interval`.
+如果你想在`YAML`文件中编写配置文件，你可以通过`grbac.WithYAML(file，interval)`加载它，`file`是你的yaml文件路径，并且grbac将每隔一个interval重新加载一次文件。
 
 ```yaml
 #Rule
@@ -330,14 +326,13 @@ If you want to write the configuration file in a `YAML` file, you can load it vi
   allow_anyone: false
 ```
 
-The above is an example of authentication rule in `YAML` format. It's structure is based on [grbac.Rules](#21-rule).
+以上是“YAML”格式的认证规则的示例。它的结构基于[grbac.Rules](#21-rule)。
 
 ```go
 func QueryRolesByHeaders(header http.Header) (roles []string,err error){
-    // Implement your logic here
+    // 在这里实现你的逻辑
     // ...
-    // This logic maybe take a token from the headers and
-    // query the user's corresponding roles from the database based on the token.
+    // 这个逻辑可能是从请求的Headers中获取token，并且根据token从数据库中查询用户的相应角色。
     return roles, err
 }
 
@@ -371,22 +366,21 @@ func main(){
     c := echo.New()
     c.Use(Authentication())
 
-    // Implement your logic here
+    // 在这里通过c.Get、c.Post等函数绑定你的API
     // ...
+    
 }
 ```
 
 ### 3.3. iris && grbac.WithRules
 
-If you want to write the authentication rules directly in the code, `grbac.WithRules(rules)` provides this way, you can use it like this:
-
+如果你想直接在代码中编写认证规则，`grbac.WithRules（rules）`提供了这种方式，你可以像这样使用它：
 ```go
 
 func QueryRolesByHeaders(header http.Header) (roles []string,err error){
-    // Implement your logic here
+    // 在这里实现你的逻辑
     // ...
-    // This logic maybe take a token from the headers and
-    // query the user's corresponding roles from the database based on the token.
+    // 这个逻辑可能是从请求的Headers中获取token，并且根据token从数据库中查询用户的相应角色。
     return roles, err
 }
 
@@ -448,22 +442,22 @@ func main(){
     c := iris.New()
     c.Use(Authentication())
 
-    // Implement your logic here
+    // 在这里通过c.Get、c.Post等函数绑定你的API
     // ...
+    
 }
 ```
 
 ### 3.4. ace && grbac.WithAdvancedRules
 
-If you want to write the authentication rules directly in the code, `grbac.WithAdvancedRules(rules)` provides this way, you can use it like this:
+如果你想直接在代码中编写认证规则，`grbac.WithAdvancedRules(rules)`提供了这种方式，你可以像这样使用它：
 
 ```go
 
 func QueryRolesByHeaders(header http.Header) (roles []string,err error){
-    // Implement your logic here
+    // 在这里实现你的逻辑
     // ...
-    // This logic maybe take a token from the headers and
-    // query the user's corresponding roles from the database based on the token.
+    // 这个逻辑可能是从请求的Headers中获取token，并且根据token从数据库中查询用户的相应角色。
     return roles, err
 }
 
@@ -511,28 +505,28 @@ func Authentication() ace.HandlerFunc {
         }
     }
 }
+
 func main(){
     c := ace.New()
     c.Use(Authentication())
 
-    // Implement your logic here
+    // 在这里通过c.Get、c.Post等函数绑定你的API
     // ...
+    
 }
 
 ```
 
-`loader.AdvancedRules` attempts to provide a simpler way to define authentication rules than `grbac.Rules`.
-
+`loader.AdvancedRules`试图提供一种比`grbac.Rules`更紧凑的定义鉴权规则的方法。
 
 ### 3.5. gin && grbac.WithLoader
 
 ```go
 
 func QueryRolesByHeaders(header http.Header) (roles []string,err error){
-    // Implement your logic here
+    // 在这里实现你的逻辑
     // ...
-    // This logic maybe take a token from the headers and
-    // query the user's corresponding roles from the database based on the token.
+    // 这个逻辑可能是从请求的Headers中获取token，并且根据token从数据库中查询用户的相应角色。
     return roles, err
 }
 
@@ -551,9 +545,11 @@ func NewMySQLLoader(dsn string) (*MySQLLoader, error) {
 }
 
 func (loader *MySQLLoader) LoadRules() (rules grbac.Rules, err error) {
-    // Implement your logic here
+    // 在这里实现你的逻辑
     // ...
-    // Extract data from the database, assemble it into grbac.Rules and return
+    // 你可以从数据库或文件加载授权规则
+    // 但是你需要以 grbac.Rules 的格式返回你的身份验证规则
+    // 提示：你还可以将此函数绑定到golang结构体
     return
 }
 
@@ -589,37 +585,36 @@ func main(){
     c := gin.New()
     c.Use(Authorization())
 
-    // Bind your API here
+    // 在这里通过c.Get、c.Post等函数绑定你的API
     // ...
 
     c.Run(":8080")
 }
 ```
 
-## 4. Enhanced wildcards
+## 4. 增强的通配符
 
-`Wildcard` supported syntax:        
+`Wildcard`支持的语法：
 ```text
 pattern:
   { term }
 term:
-  '*'         matches any sequence of non-path-separators
-  '**'        matches any sequence of characters, including
-              path separators.
-  '?'         matches any single non-path-separator character
+  '*'         匹配任何非路径分隔符的字符串
+  '**'        匹配任何字符串，包括路径分隔符.
+  '?'         匹配任何单个非路径分隔符
   '[' [ '^' ] { character-range } ']'
         character class (must be non-empty)
   '{' { term } [ ',' { term } ... ] '}'
-  c           matches character c (c != '*', '?', '\\', '[')
-  '\\' c      matches character c
+  c           匹配字符 c (c != '*', '?', '\\', '[')
+  '\\' c      匹配字符 c
 
 character-range:
-  c           matches character c (c != '\\', '-', ']')
-  '\\' c      matches character c
-  lo '-' hi   matches character c for lo <= c <= hi
+  c           匹配字符 c (c != '\\', '-', ']')
+  '\\' c      匹配字符 c
+  lo '-' hi   匹配字符 c for lo <= c <= hi
 ```
 
-## 5. BenchMark
+## 5. 运行效率
 
 ```go
 ➜ gos test -bench=. 
@@ -631,10 +626,11 @@ BenchmarkTree_Foreach_Query 	      2000           1360719 ns/op
 PASS
 ok      github.com/storyicon/grbac/pkg/tree     13.182s
 ```
-The test case contains 1000 random rules, and the `BenchmarkTree_Query` and `BenchmarkTree_Foreach_Query` functions test four requests separately, after calculation:
+
+测试用例包含1000个随机规则，“BenchmarkTree_Query”和“BenchmarkTree_Foreach_Query”函数分别测试四个请求：
 
 ```
 541397/(4*1e9)=0.0001s
 ```
 
-When there are 1000 rules, the average verification time per request is `0.0001s`.
+当有1000条规则时，每个请求的平均验证时间为“0.0001s”，这很快（大多数时间在通配符的匹配上）。
