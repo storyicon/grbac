@@ -2,7 +2,7 @@
 
 ![grbac](https://raw.githubusercontent.com/storyicon/grbac/master/docs/screenshot/grbac.png)
 
-[????](https://github.com/storyicon/grbac/blob/master/docs/README-Chinese.md)
+[中文文档](https://github.com/storyicon/grbac/blob/master/docs/README-Chinese.md)
 
 Grbac is a fast, elegant and concise `RBAC` framework. It supports [enhanced wildcards](#5-benchmark) and matches HTTP requests using [Radix](https://en.wikipedia.org/wiki/Radix) trees. Even more amazing is that you can easily use it in any existing database and data structure.        
 
