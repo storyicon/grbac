@@ -15,39 +15,40 @@
 package loader
 
 import (
-    "github.com/storyicon/grbac/pkg/meta"
-    "gopkg.in/yaml.v2"
-    "io/ioutil"
+	"io/ioutil"
+
+	"github.com/storyicon/grbac/pkg/meta"
+	"gopkg.in/yaml.v2"
 )
 
 // YAMLLoader implements the Loader interface
 // it is used to load configuration from a local yaml file.
 type YAMLLoader struct {
-    path string
+	path string
 }
 
 // NewYAMLLoader is used to initialize a YAMLLoader
-func NewYAMLLoader(file string) (*YAMLLoader, error){
-    loader := &YAMLLoader{
-        path: file,
-    }
-    _, err := loader.Load()
-    if err != nil {
-        return nil, err
-    }
-    return loader, nil
+func NewYAMLLoader(file string) (*YAMLLoader, error) {
+	loader := &YAMLLoader{
+		path: file,
+	}
+	_, err := loader.Load()
+	if err != nil {
+		return nil, err
+	}
+	return loader, nil
 }
 
 // Load is used to return a list of rules
-func (loader *YAMLLoader) Load() (meta.Rules, error){
-    bytes, err := ioutil.ReadFile(loader.path)
-    if err != nil {
-        return nil, err
-    }
-    rules := meta.Rules{}
-    err = yaml.Unmarshal(bytes, &rules)
-    if err != nil {
-        return nil, err
-    }
-    return rules, nil
+func (loader *YAMLLoader) Load() (meta.Rules, error) {
+	bytes, err := ioutil.ReadFile(loader.path)
+	if err != nil {
+		return nil, err
+	}
+	rules := meta.Rules{}
+	err = yaml.Unmarshal(bytes, &rules)
+	if err != nil {
+		return nil, err
+	}
+	return rules, nil
 }

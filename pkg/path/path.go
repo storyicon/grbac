@@ -15,40 +15,41 @@
 package path
 
 import (
-    "github.com/storyicon/grbac/pkg/path/doublestar"
-    "strings"
+	"strings"
+
+	"github.com/storyicon/grbac/pkg/path/doublestar"
 )
 
 // HasWildcardPrefix is​used to determine whether an expression is a wildcard at the beginning
 func HasWildcardPrefix(pattern string) bool {
-    if len(pattern) == 0 {
-        return false
-    }
-    switch pattern[0] {
-    case '?', '*', '[', '{':
-        return true
-    }
-    return false
+	if len(pattern) == 0 {
+		return false
+	}
+	switch pattern[0] {
+	case '?', '*', '[', '{':
+		return true
+	}
+	return false
 }
 
 // TrimWildcard is used to intercept the pattern before the first wildcard
 func TrimWildcard(pattern string) (trimmed string, hasWildcard bool) {
-    var chars []byte
+	var chars []byte
 Pattern:
-    for i := 0; i < len(pattern); i++ {
-        switch pattern[i] {
-        case '\\':
-            if i == len(pattern) - 1 {
-                break Pattern
-            }
-            i++
-        case '?', '*', '[', '{':
-            hasWildcard = true
-            break Pattern
-        }
-        chars = append(chars, pattern[i])
-    }
-    return string(chars), hasWildcard
+	for i := 0; i < len(pattern); i++ {
+		switch pattern[i] {
+		case '\\':
+			if i == len(pattern)-1 {
+				break Pattern
+			}
+			i++
+		case '?', '*', '[', '{':
+			hasWildcard = true
+			break Pattern
+		}
+		chars = append(chars, pattern[i])
+	}
+	return string(chars), hasWildcard
 }
 
 // Match returns true if name matches the shell file name pattern.
@@ -81,15 +82,15 @@ Pattern:
 // which use a different path separator (such as Windows), what you want
 // is the PathMatch() function below.
 //
-func Match(pattern string, s string) (bool, error){
-    switch pattern {
-    case "**":
-        return true, nil
-    case "*":
-        if strings.Contains(s, "/") {
-            return false, nil
-        }
-        return true, nil
-    }
-    return doublestar.Match(pattern, s)
+func Match(pattern string, s string) (bool, error) {
+	switch pattern {
+	case "**":
+		return true, nil
+	case "*":
+		if strings.Contains(s, "/") {
+			return false, nil
+		}
+		return true, nil
+	}
+	return doublestar.Match(pattern, s)
 }

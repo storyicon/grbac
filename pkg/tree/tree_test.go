@@ -16,10 +16,11 @@ package tree
 
 import (
 	"fmt"
+	"testing"
+
 	faker "github.com/bxcodec/faker/v3"
 	"github.com/storyicon/grbac/pkg/path"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 type RecordCase struct {
@@ -33,15 +34,15 @@ type QueryCase struct {
 }
 
 var (
-	TestTree *Tree
+	TestTree      *Tree
 	TestQueryCase []QueryCase
 
-	BenchTree *Tree
+	BenchTree           *Tree
 	BenchForeachRecords []RecordCase
-	BenchQueryCase []QueryCase
+	BenchQueryCase      []QueryCase
 )
 
-func init(){
+func init() {
 	defaultRecordCase := []RecordCase{
 		{[]string{"*", "**", "*"}, "global category"},
 		{[]string{"api-{prod,sit}.domain.com", "/article", "*"}, "article global category"},
@@ -54,10 +55,10 @@ func init(){
 		{[]string{"domain.com", "/login", "*"}, "login category"},
 	}
 	defaultQueryCase := []QueryCase{
-		{ []string{ "api-prod.domain.com", "/article", "GET", }, []interface{}{"global category", "article global category", "article get category"}, },
-		{ []string{ "api-sit.domain.com", "/article", "DELETE", }, []interface{}{"global category", "article global category", "article delete category"}, },
-		{ []string{ "api.domain.com", "/article", "POST", }, []interface{}{"global category"}, },
-		{ []string{ "api-prod.domain.com", "/query/keywords", "GET", }, []interface{}{"global category", "query category"}, },
+		{[]string{"api-prod.domain.com", "/article", "GET"}, []interface{}{"global category", "article global category", "article get category"}},
+		{[]string{"api-sit.domain.com", "/article", "DELETE"}, []interface{}{"global category", "article global category", "article delete category"}},
+		{[]string{"api.domain.com", "/article", "POST"}, []interface{}{"global category"}},
+		{[]string{"api-prod.domain.com", "/query/keywords", "GET"}, []interface{}{"global category", "query category"}},
 	}
 
 	TestTree = NewTree()
@@ -95,7 +96,6 @@ func init(){
 		BenchTree.Insert(benchCase.args, benchCase.data)
 	}
 }
-
 
 func TestTree_Query(t *testing.T) {
 	tree := NewTree()

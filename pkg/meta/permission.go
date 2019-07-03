@@ -15,7 +15,7 @@
 package meta
 
 import (
-    "github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/go-multierror"
 )
 
 // Permissions is the set of Permission
@@ -23,59 +23,53 @@ type Permissions []*Permission
 
 // Permission is used to define permission control information
 type Permission struct {
-    // AuthorizedRoles defines roles that allow access to specified resource
-    // Accepted type: non-empty string, *
-    //      *: means any role, but visitors should have at least one role,
-    //      non-empty string: specified role
-    AuthorizedRoles []string `json:"authorized_roles"`
-    // AuthorizedRoles defines roles that not allow access to specified resource
-    // AuthorizedRoles has a higher priority than AuthorizedRoles
-    // Accepted type: non-empty string, *
-    //      *: means any role, but visitors should have at least one role,
-    //      non-empty string: specified role
-    //
-    ForbiddenRoles []string `json:"forbidden_roles"`
-    // AllowAnyone has a higher priority than ForbiddenRoles/AuthorizedRoles
-    // If set to true, anyone will be able to pass authentication.
-    // Note that this will include people without any role.
-    AllowAnyone bool `json:"allow_anyone"`
+	// AuthorizedRoles defines roles that allow access to specified resource
+	// Accepted type: non-empty string, *
+	//      *: means any role, but visitors should have at least one role,
+	//      non-empty string: specified role
+	AuthorizedRoles []string `json:"authorized_roles"`
+	// AuthorizedRoles defines roles that not allow access to specified resource
+	// AuthorizedRoles has a higher priority than AuthorizedRoles
+	// Accepted type: non-empty string, *
+	//      *: means any role, but visitors should have at least one role,
+	//      non-empty string: specified role
+	//
+	ForbiddenRoles []string `json:"forbidden_roles"`
+	// AllowAnyone has a higher priority than ForbiddenRoles/AuthorizedRoles
+	// If set to true, anyone will be able to pass authentication.
+	// Note that this will include people without any role.
+	AllowAnyone bool `json:"allow_anyone"`
 }
 
 // IsValid is used to test the validity of the Rule
 func (p *Permission) IsValid() error {
-    if p.AllowAnyone == false && len(p.AuthorizedRoles) == 0 && len(p.ForbiddenRoles) == 0 {
-        return multierror.Prefix(ErrEmptyStructure, "permission: ")
-    }
-    return nil
+	if p.AllowAnyone == false && len(p.AuthorizedRoles) == 0 && len(p.ForbiddenRoles) == 0 {
+		return multierror.Prefix(ErrEmptyStructure, "permission: ")
+	}
+	return nil
 }
 
 // IsGranted is used to determine whether the given role can pass the authentication of *Permission.
-func (p *Permission) IsGranted(roles []string) (PermissionState, error){
-    if p.AllowAnyone {
-        return PermissionGranted, nil
-    }
+func (p *Permission) IsGranted(roles []string) (PermissionState, error) {
+	if p.AllowAnyone {
+		return PermissionGranted, nil
+	}
 
-    if len(roles) == 0 {
-        return PermissionUngranted, nil
-    }
+	if len(roles) == 0 {
+		return PermissionUngranted, nil
+	}
 
-    for _, role := range roles {
-        for _, forbidden := range p.ForbiddenRoles {
-            if forbidden == "*" || (role == forbidden) {
-                return PermissionUngranted, nil
-            }
-        }
-        for _, authorized := range p.AuthorizedRoles {
-            if authorized == "*" || (role == authorized) {
-                return PermissionGranted, nil
-            }
-        }
-    }
-    return PermissionUngranted, nil
+	for _, role := range roles {
+		for _, forbidden := range p.ForbiddenRoles {
+			if forbidden == "*" || (role == forbidden) {
+				return PermissionUngranted, nil
+			}
+		}
+		for _, authorized := range p.AuthorizedRoles {
+			if authorized == "*" || (role == authorized) {
+				return PermissionGranted, nil
+			}
+		}
+	}
+	return PermissionUngranted, nil
 }
-
-
-
-
-
-
