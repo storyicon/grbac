@@ -30,15 +30,14 @@ type Resource struct {
 
 // Match is used to calculate whether the query matches the resource
 func (r *Resource) Match(query *Query) (bool, error) {
-	for _, q := range query.GetArguments() {
-		for _, r := range r.GetArguments() {
-			matched, err := path.Match(r, q)
-			if err != nil {
-				return false, err
-			}
-			if !matched {
-				return false, nil
-			}
+	args := query.GetArguments()
+	for i, res := range r.GetArguments() {
+		matched, err := path.Match(res, args[i])
+		if err != nil {
+			return false, err
+		}
+		if !matched {
+			return false, nil
 		}
 	}
 	return true, nil

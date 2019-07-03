@@ -27,7 +27,7 @@ The component that reads the rule information is called `Loader`. grbac presets 
 
 ## 1. Most Common Use Case
 
-Below is the most common use case, which uses `gin` and wraps `grbac` as a middleware. With this example, you can easily know how to use `grbac` in other http frameworks(like `echo`, `iris`, `ace`, `etc`):
+Below is the most common use case, which uses `gin` and wraps `grbac` as a middleware. With this example, you can easily know how to use `grbac` in other http frameworks(like `echo`, `iris`, `ace`, etc):
 
 ```go
 package main

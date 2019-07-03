@@ -35,10 +35,10 @@ func (state PermissionState) IsLooselyGranted() bool {
 	return (state == PermissionGranted) || (state == PermissionNeglected)
 }
 
-// IsNeglected is used to determine if the current state is equal to PermissionUngranted
+// IsNeglected is used to determine if the current state is equal to PermissionNeglected
 // PermissionNeglected means could not find the matching rule in the list of rules
 func (state PermissionState) IsNeglected() bool {
-	return state == PermissionUngranted
+	return state == PermissionNeglected
 }
 
 // IsGranted is used to determine whether the current request is granted in a strict sense.

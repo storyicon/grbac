@@ -6,10 +6,8 @@
 package doublestar
 
 import (
-	"fmt"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 	"unicode/utf8"
 )
@@ -183,142 +181,6 @@ func doMatching(patternComponents, nameComponents []string) (matched bool, err e
 		nameIdx++
 	}
 	return patIdx >= patternLen && nameIdx >= nameLen, nil
-}
-
-// Glob returns the names of all files matching pattern or nil
-// if there is no matching file. The syntax of pattern is the same
-// as in Match. The pattern may describe hierarchical names such as
-// /usr/*/bin/ed (assuming the Separator is '/').
-//
-// Glob ignores file system errors such as I/O errors reading directories.
-// The only possible returned error is ErrBadPattern, when pattern
-// is malformed.
-//
-// Your system path separator is automatically used. This means on
-// systems where the separator is '\\' (Windows), escaping will be
-// disabled.
-//
-// Note: this is meant as a drop-in replacement for filepath.Glob().
-//
-func Glob(pattern string) (matches []string, err error) {
-	patternComponents := splitPathOnSeparator(filepath.ToSlash(pattern), '/')
-	if len(patternComponents) == 0 {
-		return nil, nil
-	}
-
-	// On Windows systems, this will return the drive name ('C:'), on others,
-	// it will return an empty string.
-	volumeName := filepath.VolumeName(pattern)
-
-	// If the first pattern component is equal to the volume name, then the
-	// pattern is an absolute path.
-	if patternComponents[0] == volumeName {
-		return doGlob(fmt.Sprintf("%s%s", volumeName, string(os.PathSeparator)), patternComponents[1:], matches)
-	}
-
-	// otherwise, it's a relative pattern
-	return doGlob(".", patternComponents, matches)
-}
-
-// Perform a glob
-func doGlob(basedir string, components, matches []string) (m []string, e error) {
-	m = matches
-	e = nil
-
-	// figure out how many components we don't need to glob because they're
-	// just names without patterns - we'll use os.Lstat below to check if that
-	// path actually exists
-	patLen := len(components)
-	patIdx := 0
-	for ; patIdx < patLen; patIdx++ {
-		if strings.IndexAny(components[patIdx], "*?[{\\") >= 0 {
-			break
-		}
-	}
-	if patIdx > 0 {
-		basedir = filepath.Join(basedir, filepath.Join(components[0:patIdx]...))
-	}
-
-	// Lstat will return an error if the file/directory doesn't exist
-	fi, err := os.Lstat(basedir)
-	if err != nil {
-		return
-	}
-
-	// if there are no more components, we've found a match
-	if patIdx >= patLen {
-		m = append(m, basedir)
-		return
-	}
-
-	// otherwise, we need to check each item in the directory...
-	// first, if basedir is a symlink, follow it...
-	if (fi.Mode() & os.ModeSymlink) != 0 {
-		fi, err = os.Stat(basedir)
-		if err != nil {
-			return
-		}
-	}
-
-	// confirm it's a directory...
-	if !fi.IsDir() {
-		return
-	}
-
-	// read directory
-	dir, err := os.Open(basedir)
-	if err != nil {
-		return
-	}
-	defer dir.Close()
-
-	files, _ := dir.Readdir(-1)
-	lastComponent := (patIdx + 1) >= patLen
-	if components[patIdx] == "**" {
-		// if the current component is a doublestar, we'll try depth-first
-		for _, file := range files {
-			// if symlink, we may want to follow
-			if (file.Mode() & os.ModeSymlink) != 0 {
-				file, err = os.Stat(filepath.Join(basedir, file.Name()))
-				if err != nil {
-					continue
-				}
-			}
-
-			if file.IsDir() {
-				// recurse into directories
-				if lastComponent {
-					m = append(m, filepath.Join(basedir, file.Name()))
-				}
-				m, e = doGlob(filepath.Join(basedir, file.Name()), components[patIdx:], m)
-			} else if lastComponent {
-				// if the pattern's last component is a doublestar, we match filenames, too
-				m = append(m, filepath.Join(basedir, file.Name()))
-			}
-		}
-		if lastComponent {
-			return // we're done
-		}
-		patIdx++
-		lastComponent = (patIdx + 1) >= patLen
-	}
-
-	// check items in current directory and recurse
-	var match bool
-	for _, file := range files {
-		match, e = matchComponent(components[patIdx], file.Name())
-		if e != nil {
-			return
-		}
-		if match {
-			if lastComponent {
-				m = append(m, filepath.Join(basedir, file.Name()))
-			} else {
-				m, e = doGlob(filepath.Join(basedir, file.Name()), components[patIdx+1:], m)
-			}
-		}
-	}
-	return
 }
 
 // Attempt to match a single pattern component with a path component
