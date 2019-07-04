@@ -278,7 +278,7 @@ func Authentication() gin.HandlerFunc {
         }
 
         if !state.IsGranted() {
-            c.AbortWithStatus(http.StatusInternalServerError)
+            c.AbortWithStatus(http.StatusUnauthorized)
             return
         }
     }
