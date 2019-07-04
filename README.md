@@ -282,7 +282,7 @@ func Authentication() gin.HandlerFunc {
         }
 
         if !state.IsGranted() {
-            c.AbortWithStatus(http.StatusInternalServerError)
+            c.AbortWithStatus(http.StatusUnauthorized)
             return
         }
     }
@@ -395,7 +395,7 @@ func Authentication() iris.Handler {
         {
             ID: 0,
             Resource: &grbac.Resource{
-                        Host: "*",
+                Host: "*",
                 Path: "**",
                 Method: "*",
             },
@@ -408,12 +408,12 @@ func Authentication() iris.Handler {
         {
             ID: 1,
             Resource: &grbac.Resource{
-                    Host: "domain.com",
+                Host: "domain.com",
                 Path: "/article",
                 Method: "{DELETE,POST,PUT}",
             },
             Permission: &grbac.Permission{
-                    AuthorizedRoles: []string{"editor"},
+                AuthorizedRoles: []string{"editor"},
                 ForbiddenRoles: []string{},
                 AllowAnyone: false,
             },
@@ -426,18 +426,18 @@ func Authentication() iris.Handler {
     return func(c context.Context) {
         roles, err := QueryRolesByHeaders(c.Request().Header)
         if err != nil {
-                c.StatusCode(http.StatusInternalServerError)
+            c.StatusCode(http.StatusInternalServerError)
             c.StopExecution()
             return
         }
         state, err := rbac.IsRequestGranted(c.Request(), roles)
         if err != nil {
-                c.StatusCode(http.StatusInternalServerError)
+            c.StatusCode(http.StatusInternalServerError)
             c.StopExecution()
             return
         }
         if !state.IsGranted() {
-                c.StatusCode(http.StatusUnauthorized)
+            c.StatusCode(http.StatusUnauthorized)
             c.StopExecution()
             return
         }
