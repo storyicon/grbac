@@ -2,7 +2,7 @@
 
 ![grbac](https://raw.githubusercontent.com/storyicon/grbac/master/docs/screenshot/grbac.png)
 
-Grbac是一个快速，优雅和简洁的[RBAC](https://en.wikipedia.org/wiki/Role-based_access_control)框架。它支持[增强的通配符](#5-benchmark)并使用[Radix](https://en.wikipedia.org/wiki/Radix)树匹配HTTP请求。令人惊奇的是，您可以在任何现有的数据库和数据结构中轻松使用它。
+Grbac是一个快速，优雅和简洁的[RBAC](https://en.wikipedia.org/wiki/Role-based_access_control)框架。它支持[增强的通配符](#4-enhanced-wildcards)并使用[Radix](https://en.wikipedia.org/wiki/Radix)树匹配HTTP请求。令人惊奇的是，您可以在任何现有的数据库和数据结构中轻松使用它。
 
 grbac的作用是确保指定的资源只能由指定的角色访问。请注意，grbac不负责存储鉴权规则和分辨“当前请求发起者具有哪些角色”，更不负责角色的创建、分配等。这意味着您应该首先配置规则信息，并提供每个请求的发起者具有的角色。
 
@@ -164,7 +164,7 @@ type Resource struct {
 Resource用于描述Rule适用的资源。
 当执行`IsRequestGranted(c.Request，roles)`时，grbac首先将当前的`Request`与所有`Rule`中的`Resources`匹配。
 
-Resource的每个字段都支持[增强的通配符](#5-benchmark)
+Resource的每个字段都支持[增强的通配符](#4-enhanced-wildcards)
 
 ### 2.3. Permission
 
