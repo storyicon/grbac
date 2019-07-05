@@ -4,7 +4,7 @@
 
 [中文文档](https://github.com/storyicon/grbac/blob/master/docs/README-chinese.md)
 
-Grbac is a fast, elegant and concise [RBAC](https://en.wikipedia.org/wiki/Role-based_access_control) framework. It supports [enhanced wildcards](#5-benchmark) and matches HTTP requests using [Radix](https://en.wikipedia.org/wiki/Radix) trees. Even more amazing is that you can easily use it in any existing database and data structure.        
+Grbac is a fast, elegant and concise [RBAC](https://en.wikipedia.org/wiki/Role-based_access_control) framework. It supports [enhanced wildcards](#4-enhanced-wildcards) and matches HTTP requests using [Radix](https://en.wikipedia.org/wiki/Radix) trees. Even more amazing is that you can easily use it in any existing database and data structure.        
 
 What grbac does is ensure that the specified resource can only be accessed by the specified role. Please note that grbac is not responsible for the storage of rule configurations and "what roles the current request initiator has". It means you should configure the rule information first and provide the roles that the initiator of each request has.        
 
@@ -169,7 +169,7 @@ type Resource struct {
 Resource is used to describe which resources a rule applies to. 
 When `IsRequestGranted(c.Request, roles)` is executed, grbac first matches the current `Request` with the `Resources` in all `Rule`s.
 
-Each field of Resource supports [enhanced wildcards](#5-benchmark)
+Each field of Resource supports [enhanced wildcards](#4-enhanced-wildcards)
 
 ### 2.3. Permission
 
@@ -282,7 +282,7 @@ func Authentication() gin.HandlerFunc {
         }
 
         if !state.IsGranted() {
-            c.AbortWithStatus(http.StatusInternalServerError)
+            c.AbortWithStatus(http.StatusUnauthorized)
             return
         }
     }
@@ -395,7 +395,7 @@ func Authentication() iris.Handler {
         {
             ID: 0,
             Resource: &grbac.Resource{
-                        Host: "*",
+                Host: "*",
                 Path: "**",
                 Method: "*",
             },
@@ -408,12 +408,12 @@ func Authentication() iris.Handler {
         {
             ID: 1,
             Resource: &grbac.Resource{
-                    Host: "domain.com",
+                Host: "domain.com",
                 Path: "/article",
                 Method: "{DELETE,POST,PUT}",
             },
             Permission: &grbac.Permission{
-                    AuthorizedRoles: []string{"editor"},
+                AuthorizedRoles: []string{"editor"},
                 ForbiddenRoles: []string{},
                 AllowAnyone: false,
             },
@@ -426,18 +426,18 @@ func Authentication() iris.Handler {
     return func(c context.Context) {
         roles, err := QueryRolesByHeaders(c.Request().Header)
         if err != nil {
-                c.StatusCode(http.StatusInternalServerError)
+            c.StatusCode(http.StatusInternalServerError)
             c.StopExecution()
             return
         }
         state, err := rbac.IsRequestGranted(c.Request(), roles)
         if err != nil {
-                c.StatusCode(http.StatusInternalServerError)
+            c.StatusCode(http.StatusInternalServerError)
             c.StopExecution()
             return
         }
         if !state.IsGranted() {
-                c.StatusCode(http.StatusUnauthorized)
+            c.StatusCode(http.StatusUnauthorized)
             c.StopExecution()
             return
         }
