@@ -15,47 +15,47 @@
 package meta
 
 import (
-	"github.com/storyicon/grbac/pkg/path"
+    "github.com/storyicon/grbac/pkg/path"
 )
 
 // Resource defines resources
 type Resource struct {
-	// Host defines the host of the resource, allowing wildcards to be used.
-	Host string `json:"host"`
-	// Path defines the path of the resource, allowing wildcards to be used.
-	Path string `json:"path"`
-	// Method defines the method of the resource, allowing wildcards to be used.
-	Method string `json:"method"`
+    // Host defines the host of the resource, allowing wildcards to be used.
+    Host string `json:"host"`
+    // Path defines the path of the resource, allowing wildcards to be used.
+    Path string `json:"path"`
+    // Method defines the method of the resource, allowing wildcards to be used.
+    Method string `json:"method"`
 }
 
 // Match is used to calculate whether the query matches the resource
 func (r *Resource) Match(query *Query) (bool, error) {
-	args := query.GetArguments()
-	for i, res := range r.GetArguments() {
-		matched, err := path.Match(res, args[i])
-		if err != nil {
-			return false, err
-		}
-		if !matched {
-			return false, nil
-		}
-	}
-	return true, nil
+    args := query.GetArguments()
+    for i, res := range r.GetArguments() {
+        matched, err := path.Match(res, args[i])
+        if err != nil {
+            return false, err
+        }
+        if !matched {
+            return false, nil
+        }
+    }
+    return true, nil
 }
 
 // GetArguments is used to convert the current argument to a string slice
 func (r *Resource) GetArguments() []string {
-	return []string{
-		r.Host,
-		r.Path,
-		r.Method,
-	}
+    return []string{
+        r.Host,
+        r.Path,
+        r.Method,
+    }
 }
 
 // IsValid is used to test the validity of the Rule
 func (r *Resource) IsValid() error {
-	if r.Host == "" || r.Method == "" || r.Path == "" {
-		return ErrFieldIncomplete
-	}
-	return nil
+    if r.Host == "" || r.Method == "" || r.Path == "" {
+        return ErrFieldIncomplete
+    }
+    return nil
 }

@@ -17,7 +17,7 @@
 package grbac
 
 import (
-	"github.com/storyicon/grbac/pkg/meta"
+    "github.com/storyicon/grbac/pkg/meta"
 )
 
 // Resource defines resources

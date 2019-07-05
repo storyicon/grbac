@@ -15,40 +15,40 @@
 package loader
 
 import (
-	"io/ioutil"
+    "io/ioutil"
 
-	jsoniter "github.com/json-iterator/go"
-	"github.com/storyicon/grbac/pkg/meta"
+    jsoniter "github.com/json-iterator/go"
+    "github.com/storyicon/grbac/pkg/meta"
 )
 
 // JSONLoader implements the Loader interface
 // it is used to load configuration from a local json file.
 type JSONLoader struct {
-	path string
+    path string
 }
 
 // NewJSONLoader is used to initialize a JSONLoader
 func NewJSONLoader(file string) (*JSONLoader, error) {
-	loader := &JSONLoader{
-		path: file,
-	}
-	_, err := loader.Load()
-	if err != nil {
-		return nil, err
-	}
-	return loader, nil
+    loader := &JSONLoader{
+        path: file,
+    }
+    _, err := loader.Load()
+    if err != nil {
+        return nil, err
+    }
+    return loader, nil
 }
 
 // Load is used to return a list of rules
 func (loader *JSONLoader) Load() (meta.Rules, error) {
-	bytes, err := ioutil.ReadFile(loader.path)
-	if err != nil {
-		return nil, err
-	}
-	rules := meta.Rules{}
-	err = jsoniter.Unmarshal(bytes, &rules)
-	if err != nil {
-		return nil, err
-	}
-	return rules, nil
+    bytes, err := ioutil.ReadFile(loader.path)
+    if err != nil {
+        return nil, err
+    }
+    rules := meta.Rules{}
+    err = jsoniter.Unmarshal(bytes, &rules)
+    if err != nil {
+        return nil, err
+    }
+    return rules, nil
 }

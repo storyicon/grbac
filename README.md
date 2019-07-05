@@ -14,16 +14,16 @@ The component that reads the rule information is called `Loader`. grbac presets 
 
 - [1. Most Common Use Case](#1-most-common-use-case)
 - [2. Concept](#2-concept)
-	- [2.1. Rule](#21-rule)
-	- [2.2. Resource](#22-resource)
-	- [2.3. Permission](#23-permission)
-	- [2.4. Loader](#24-loader)
+    - [2.1. Rule](#21-rule)
+    - [2.2. Resource](#22-resource)
+    - [2.3. Permission](#23-permission)
+    - [2.4. Loader](#24-loader)
 - [3. Other Examples](#3-other-examples)
-	- [3.1. gin && grbac.WithJSON](#31-gin--grbacwithjson)
-	- [3.2. echo && grbac.WithYaml](#32-echo--grbacwithyaml)
-	- [3.3. iris && grbac.WithRules](#33-iris--grbacwithrules)
-	- [3.4. ace && grbac.WithAdvancedRules](#34-ace--grbacwithadvancedrules)
-	- [3.5. gin && grbac.WithLoader](#35-gin--grbacwithloader)
+    - [3.1. gin && grbac.WithJSON](#31-gin--grbacwithjson)
+    - [3.2. echo && grbac.WithYaml](#32-echo--grbacwithyaml)
+    - [3.3. iris && grbac.WithRules](#33-iris--grbacwithrules)
+    - [3.4. ace && grbac.WithAdvancedRules](#34-ace--grbacwithadvancedrules)
+    - [3.5. gin && grbac.WithLoader](#35-gin--grbacwithloader)
 - [4. Enhanced wildcards](#4-enhanced-wildcards)
 - [5. BenchMark](#5-benchmark)
 
@@ -626,8 +626,8 @@ character-range:
 goos: linux
 goarch: amd64
 pkg: github.com/storyicon/grbac/pkg/tree
-BenchmarkTree_Query         	      2000           541397 ns/op
-BenchmarkTree_Foreach_Query 	      2000           1360719 ns/op
+BenchmarkTree_Query                   2000           541397 ns/op
+BenchmarkTree_Foreach_Query           2000           1360719 ns/op
 PASS
 ok      github.com/storyicon/grbac/pkg/tree     13.182s
 ```

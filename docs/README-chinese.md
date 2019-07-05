@@ -621,8 +621,8 @@ character-range:
 goos: linux
 goarch: amd64
 pkg: github.com/storyicon/grbac/pkg/tree
-BenchmarkTree_Query         	      2000           541397 ns/op
-BenchmarkTree_Foreach_Query 	      2000           1360719 ns/op
+BenchmarkTree_Query                   2000           541397 ns/op
+BenchmarkTree_Foreach_Query           2000           1360719 ns/op
 PASS
 ok      github.com/storyicon/grbac/pkg/tree     13.182s
 ```
