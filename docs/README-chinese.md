@@ -24,6 +24,7 @@ grbac将`Host`、`Path`和`Method`的组合视为`Resource`，并将`Resource`�
     - [3.5. gin && grbac.WithLoader](#35-gin--grbacwithloader)
 - [4. 增强的通配符](#4-增强的通配符)
 - [5. 运行效率](#5-运行效率)
+- [6. 生产环境](#6-生产环境)
 
 ## 1. 最常见的用例
 
@@ -634,3 +635,9 @@ ok      github.com/storyicon/grbac/pkg/tree     13.182s
 ```
 
 当有1000条规则时，每个请求的平均验证时间为“0.0001s”，这很快（大多数时间在通配符的匹配上）。
+
+## 6. 生产环境      
+
+`grbac` 已经被以下企业用于生产环境:    
+
+![wallstreetcn](https://raw.githubusercontent.com/storyicon/grbac/master/docs/screenshot/wallstreetcn.png)
