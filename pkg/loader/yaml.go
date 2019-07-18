@@ -18,7 +18,7 @@ import (
     "io/ioutil"
 
     "github.com/storyicon/grbac/pkg/meta"
-    "gopkg.in/yaml.v2"
+    "gopkg.in/yaml.v3"
 )
 
 // YAMLLoader implements the Loader interface

@@ -21,11 +21,11 @@ import (
 // Resource defines resources
 type Resource struct {
     // Host defines the host of the resource, allowing wildcards to be used.
-    Host string `json:"host"`
+    Host string `json:"host" yaml:"host"`
     // Path defines the path of the resource, allowing wildcards to be used.
-    Path string `json:"path"`
+    Path string `json:"path" yaml:"path"`
     // Method defines the method of the resource, allowing wildcards to be used.
-    Method string `json:"method"`
+    Method string `json:"method" yaml:"method"`
 }
 
 // Match is used to calculate whether the query matches the resource

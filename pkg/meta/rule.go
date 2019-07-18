@@ -29,9 +29,9 @@ type Rule struct {
     // When a request is matched to more than one rule,
     // then authentication will only use the permission configuration for the rule with the highest ID value.
     // If there are multiple rules that are the largest ID, then one of them will be used randomly.
-    ID int `json:"id"`
-    *Resource
-    *Permission
+    ID int `json:"id" yaml:"id"`
+    *Resource `yaml:",inline"`
+    *Permission `yaml:",inline"`
 }
 
 // IsValid is used to test the validity of the Rule

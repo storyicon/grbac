@@ -27,18 +27,18 @@ type Permission struct {
     // Accepted type: non-empty string, *
     //      *: means any role, but visitors should have at least one role,
     //      non-empty string: specified role
-    AuthorizedRoles []string `json:"authorized_roles"`
+    AuthorizedRoles []string `json:"authorized_roles" yaml:"authorized_roles"`
     // ForbiddenRoles defines roles that not allow access to specified resource
     // ForbiddenRoles has a higher priority than AuthorizedRoles
     // Accepted type: non-empty string, *
     //      *: means any role, but visitors should have at least one role,
     //      non-empty string: specified role
     //
-    ForbiddenRoles []string `json:"forbidden_roles"`
+    ForbiddenRoles []string `json:"forbidden_roles" yaml:"forbidden_roles"`
     // AllowAnyone has a higher priority than ForbiddenRoles/AuthorizedRoles
     // If set to true, anyone will be able to pass authentication.
     // Note that this will include people without any role.
-    AllowAnyone bool `json:"allow_anyone"`
+    AllowAnyone bool `json:"allow_anyone" yaml:"allow_anyone"`
 }
 
 // IsValid is used to test the validity of the Rule
