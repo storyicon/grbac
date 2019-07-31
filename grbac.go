@@ -143,9 +143,9 @@ func New(loaderOptions ControllerOption, options ...ControllerOption) (*Controll
     if c.loadInterval < time.Second {
         if c.loadInterval >= 0 {
             c.loadInterval = 5 * time.Second
-            c.runCronTab()
         }
     }
+    c.runCronTab()
 
     return c, nil
 }
