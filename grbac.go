@@ -140,11 +140,6 @@ func New(loaderOptions ControllerOption, options ...ControllerOption) (*Controll
         return nil, err
     }
 
-    if c.loadInterval < time.Second {
-        if c.loadInterval >= 0 {
-            c.loadInterval = 5 * time.Second
-        }
-    }
     c.runCronTab()
 
     return c, nil
@@ -198,12 +193,15 @@ func (c *Controller) buildTree() error {
 }
 
 func (c *Controller) runCronTab() {
+    if c.loadInterval < time.Second && c.loadInterval >= 0 {
+        c.loadInterval = 5 * time.Second
+    }
     if c.loadInterval < 0 {
         c.logger.Warning("grbac abandoned the periodic loader because loadInterval is less than 0")
         return
     }
     interval := fmt.Sprintf("@every %ds", int(c.loadInterval.Seconds()))
-    c.cron.AddFunc(interval, func() {
+    _ = c.cron.AddFunc(interval, func() {
         c.logger.Debugln("grbac loader is scheduled")
         err := c.reload()
         if err != nil {
