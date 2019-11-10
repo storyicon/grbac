@@ -201,7 +201,7 @@ func (c *Controller) runCronTab() {
         return
     }
     interval := fmt.Sprintf("@every %ds", int(c.loadInterval.Seconds()))
-    _ = c.cron.AddFunc(interval, func() {
+    _, _ = c.cron.AddFunc(interval, func() {
         c.logger.Debugln("grbac loader is scheduled")
         err := c.reload()
         if err != nil {
