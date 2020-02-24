@@ -16,12 +16,10 @@ package grbac
 
 import (
     "errors"
-    "fmt"
     "net/http"
     "sync"
     "time"
 
-    "github.com/robfig/cron"
     "github.com/sirupsen/logrus"
     "github.com/storyicon/grbac/pkg/loader"
     "github.com/storyicon/grbac/pkg/meta"
@@ -36,7 +34,7 @@ var (
 
 // Controller defines the structure of the controller
 type Controller struct {
-    cron         *cron.Cron
+    cron         *time.Ticker
     loader       func() (Rules, error)
     loadInterval time.Duration
 
@@ -120,7 +118,6 @@ func WithLoader(loader func() (Rules, error), loadInterval time.Duration) Contro
 func New(loaderOptions ControllerOption, options ...ControllerOption) (*Controller, error) {
     c := &Controller{
         logger: logrus.New(),
-        cron:   cron.New(),
     }
 
     opts := append([]ControllerOption{loaderOptions}, options...)
@@ -140,7 +137,7 @@ func New(loaderOptions ControllerOption, options ...ControllerOption) (*Controll
         return nil, err
     }
 
-    c.runCronTab()
+    go c.runCronTab()
 
     return c, nil
 }
@@ -200,15 +197,19 @@ func (c *Controller) runCronTab() {
         c.logger.Warning("grbac abandoned the periodic loader because loadInterval is less than 0")
         return
     }
-    interval := fmt.Sprintf("@every %ds", int(c.loadInterval.Seconds()))
-    _ = c.cron.AddFunc(interval, func() {
-        c.logger.Debugln("grbac loader is scheduled")
-        err := c.reload()
-        if err != nil {
-            c.logger.Errorln("error occurred while loading the configuration in grbac: ", err)
+
+    ticker := time.NewTicker(c.loadInterval)
+    c.cron = ticker
+    for {
+        select {
+        case <-ticker.C:
+            c.logger.Debugln("grbac loader is scheduled")
+            err := c.reload()
+            if err != nil {
+                c.logger.Errorln("error occurred while loading the configuration in grbac: ", err)
+            }
         }
-    })
-    c.cron.Start()
+    }
 }
 
 func getQueryByRequest(r *http.Request) *Query {
